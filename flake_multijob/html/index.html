@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Selector</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #app {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 450px;
+            max-height: 80vh;
+        }
+
+        #app.active {
+            display: block;
+        }
+
+        .job-selector-container {
+            background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            animation: slideInUp 0.3s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .header-title {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: rotate(90deg);
+        }
+
+        .content {
+            max-height: 60vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 8px;
+        }
+
+        .content::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: rgba(79, 195, 247, 0.5);
+            border-radius: 10px;
+        }
+
+        .section-title {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .job-card {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .job-card:hover {
+            background: rgba(255, 255, 255, 0.09);
+            transform: translateX(3px);
+        }
+
+        .job-card.active {
+            background: rgba(79, 195, 247, 0.15);
+            border-color: #4FC3F7;
+        }
+
+        .job-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .job-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .job-info {
+            flex: 1;
+        }
+
+        .job-name {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .job-grade {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+        }
+
+        .job-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .active-badge {
+            background: #10b981;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn.select {
+            background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 100%);
+        }
+
+        .action-btn.select:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.4);
+        }
+
+        .action-btn.remove {
+            background: rgba(239, 68, 68, 0.8);
+        }
+
+        .action-btn.remove:hover {
+            background: rgba(239, 68, 68, 1);
+            transform: scale(1.08);
+        }
+
+        .action-btn.add {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .action-btn.add:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .offduty-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .offduty-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .footer-info {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+        }
+
+        .job-count {
+            background: rgba(79, 195, 247, 0.2);
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-weight: 600;
+            color: #4FC3F7;
+        }
+
+        .no-jobs {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="job-selector-container">
+            <div class="header">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div class="header-title" id="menuTitle">Job Management</div>
+                </div>
+                <button class="close-btn" id="closeBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="content" id="content"></div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let currentJob = null;
+        let currentGrade = 0;
+        let playerJobs = [];
+        let availableJobs = [];
+        let isJobCenter = false;
+        let offDutyAvailable = false;
+
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+
+            if (data.type === 'open') {
+                isJobCenter = false;
+                currentJob = data.job.job;
+                currentGrade = data.job.grade;
+                playerJobs = JSON.parse(data.jobs);
+                offDutyAvailable = data.offduty;
+                openUI();
+            } else if (data.type === 'openCenter') {
+                isJobCenter = true;
+                currentJob = data.job.job;
+                currentGrade = data.job.grade;
+                playerJobs = JSON.parse(data.jobs);
+                availableJobs = JSON.parse(data.center);
+                openUI();
+            } else if (data.type === 'update') {
+                currentJob = data.job.job;
+                currentGrade = data.job.grade;
+                playerJobs = JSON.parse(data.jobs);
+                offDutyAvailable = data.offduty;
+                renderContent();
+            }
+        });
+
+        function openUI() {
+            document.getElementById('app').classList.add('active');
+            renderContent();
+        }
+
+        function closeUI() {
+            document.getElementById('app').classList.remove('active');
+            $.post('https://multijob/close', JSON.stringify({}));
+        }
+
+        document.getElementById('closeBtn').addEventListener('click', function() {
+            closeUI();
+        });
+
+        function renderContent() {
+            const title = document.getElementById('menuTitle');
+            
+            if (isJobCenter) {
+                title.textContent = 'Job Center';
+                renderJobCenter();
+            } else {
+                title.textContent = 'Job Management';
+                renderManagement();
+            }
+        }
+
+        function renderJobCenter() {
+            const content = document.getElementById('content');
+            let html = '';
+
+            html += `<div class="section-title">
+                <i class="fas fa-building"></i>
+                Available Jobs
+            </div>`;
+
+            if (availableJobs && availableJobs.length > 0) {
+                availableJobs.forEach(job => {
+                    const hasJob = playerJobs.some(pj => pj.name === job.job);
+                    
+                    html += `
+                        <div class="job-card ${hasJob ? 'active' : ''}">
+                            <div class="job-left">
+                                <div class="job-icon" style="background: ${job.color || '#4FC3F7'}">
+                                    <i class="${job.icon}"></i>
+                                </div>
+                                <div class="job-info">
+                                    <div class="job-name">${job.label}</div>
+                                    <div class="job-grade">${job.description}</div>
+                                </div>
+                            </div>
+                            <div class="job-right">
+                                ${hasJob ? 
+                                    `<span class="active-badge"><i class="fas fa-check"></i> Added</span>` :
+                                    `<button class="action-btn add" onclick="addJob('${job.job}')">
+                                        <i class="fas fa-plus"></i>
+                                    </button>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<div class="no-jobs">No jobs available</div>';
+            }
+
+            content.innerHTML = html;
+        }
+
+        function renderManagement() {
+            const content = document.getElementById('content');
+            let html = '';
+
+            html += `<div class="section-title">
+                <i class="fas fa-briefcase"></i>
+                Your Jobs
+            </div>`;
+
+            if (playerJobs && playerJobs.length > 0) {
+                playerJobs.forEach(job => {
+                    const isActive = currentJob === job.name && currentGrade == job.grade;
+                    const jobColor = getJobColor(job.name);
+                    const jobIcon = getJobIcon(job.name);
+                    
+                    html += `
+                        <div class="job-card ${isActive ? 'active' : ''}">
+                            <div class="job-left">
+                                <div class="job-icon" style="background: ${jobColor}">
+                                    <i class="${jobIcon}"></i>
+                                </div>
+                                <div class="job-info">
+                                    <div class="job-name">${job.label}</div>
+                                    <div class="job-grade">${job.grade_label} - $${job.salary}</div>
+                                </div>
+                            </div>
+                            <div class="job-right">
+                                ${isActive ? 
+                                    `<span class="active-badge"><i class="fas fa-circle"></i> ACTIVE</span>` :
+                                    `<button class="action-btn select" onclick="selectJob('${job.name}', ${job.grade})">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>`
+                                }
+                                ${job.removable && !isActive ? 
+                                    `<button class="action-btn remove" onclick="removeJob('${job.name}', ${job.grade})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>` : ''
+                                }
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<div class="no-jobs">You have no jobs</div>';
+            }
+
+            if (offDutyAvailable) {
+                const isOffDuty = currentJob === 'offduty';
+                html += `<button class="offduty-btn" onclick="toggleOffDuty()">
+                    <i class="fas fa-power-off"></i> ${isOffDuty ? 'Go On Duty' : 'Go Off Duty'}
+                </button>`;
+            }
+
+            html += `<div class="footer-info">
+                <div>
+                    <i class="fas fa-info-circle"></i>
+                    <span>Total: <span class="job-count">${playerJobs.length}</span></span>
+                </div>
+            </div>`;
+
+            content.innerHTML = html;
+        }
+
+        function selectJob(job, grade) {
+            currentJob = job;
+            currentGrade = grade;
+            renderContent();
+            
+            $.post('https://multijob/changejob', JSON.stringify({
+                job: job,
+                grade: grade
+            }));
+        }
+
+        function addJob(job) {
+            $.post('https://multijob/addjob', JSON.stringify({
+                job: job
+            }), function(response) {
+                setTimeout(() => {
+                    $.post('https://multijob/requestupdate', JSON.stringify({}));
+                }, 300);
+            });
+        }
+
+        function removeJob(job, grade) {
+            playerJobs = playerJobs.filter(j => !(j.name === job && j.grade == grade));
+            renderContent();
+            
+            $.post('https://multijob/removejob', JSON.stringify({
+                job: job,
+                grade: grade
+            }));
+        }
+
+        function toggleOffDuty() {
+            if (offDutyAvailable) {
+                if (currentJob === 'offduty') {
+                    const targetJob = playerJobs[0]?.name || 'unemployed';
+                    const targetGrade = playerJobs[0]?.grade || 0;
+                    
+                    currentJob = targetJob;
+                    currentGrade = targetGrade;
+                    renderContent();
+                    
+                    $.post('https://multijob/changejob', JSON.stringify({
+                        job: targetJob,
+                        grade: targetGrade
+                    }));
+                } else {
+                    currentJob = 'offduty';
+                    currentGrade = 0;
+                    renderContent();
+                    
+                    $.post('https://multijob/changejob', JSON.stringify({
+                        job: 'offduty',
+                        grade: 0
+                    }));
+                }
+            } else {
+                $.post('https://multijob/cantoffduty', JSON.stringify({}));
+            }
+        }
+
+        function getJobColor(job) {
+            const colors = {
+                'police': '#4FC3F7',
+                'ambulance': '#ef4444',
+                'mechanic': '#f59e0b',
+                'unemployed': '#6b7280',
+                'miner': '#8B4513',
+                'lumberjack': '#228B22',
+                'fisherman': '#1E90FF',
+                'trucker': '#FF8C00',
+                'trucking': '#FF8C00',
+                'garbage': '#696969',
+                'taxi': '#FFD700',
+                'gunstore': '#2c3e50',
+                'offduty': '#9ca3af'
+            };
+            return colors[job] || '#4FC3F7';
+        }
+
+        function getJobIcon(job) {
+            const icons = {
+                'police': 'fas fa-shield-alt',
+                'ambulance': 'fas fa-briefcase-medical',
+                'mechanic': 'fas fa-wrench',
+                'unemployed': 'fas fa-user',
+                'miner': 'fas fa-gem',
+                'lumberjack': 'fas fa-tree',
+                'fisherman': 'fas fa-fish',
+                'trucker': 'fas fa-truck',
+                'trucking': 'fas fa-truck-fast',
+                'garbage': 'fas fa-dumpster',
+                'taxi': 'fas fa-taxi',
+                'gunstore': 'fas fa-gun',
+                'offduty': 'fas fa-moon'
+            };
+            return icons[job] || 'fas fa-briefcase';
+        }
+
+        document.addEventListener('keyup', function(event) {
+            if (event.key === 'Escape') {
+                closeUI();
+            }
+        });
+    </script>
+</body>
+</html>
